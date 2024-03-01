@@ -39,6 +39,15 @@ namespace pcl_lib
                     assert(i < num_points);
                     return points[i];
                 };
+
+                pcl_lib::PointCloud<T> operator+(const pcl_lib::PointCloud<T>& other) const {
+                    std::vector<pcl_lib::Point<T>> new_points;
+                    new_points.reserve(num_points + other.size());
+                    new_points.insert(new_points.end(), points.begin(), points.end());
+                    new_points.insert(new_points.end(), other.get_points().begin(), other.get_points().end());
+                    
+                    return pcl_lib::PointCloud<T>(new_points, false); 
+                };
  
                 const pcl_lib::Point<T>& at(const std::size_t i) const {
                     assert(i < num_points);
@@ -169,6 +178,14 @@ namespace pcl_lib
                     }
                 };
 
+                const pcl::PointCloud<pcl::PointXYZ>::Ptr to_pcl() const{
+                    pcl::PointCloud<pcl::PointXYZ>::Ptr pcl_cloud(new pcl::PointCloud<pcl::PointXYZ>);
+                    for (const auto &point : points){
+                        pcl_cloud->push_back(pcl::PointXYZ(point.x, point.y, point.z));
+                    }
+                    return pcl_cloud;
+                };
+
             private:
                 std::vector<pcl_lib::Point<T>> points;
                 std::size_t num_points{0};
@@ -184,14 +201,6 @@ namespace pcl_lib
                     ne.setRadiusSearch(search_radius);
                     ne.compute(*normals);
                     return normals;
-                };
-                
-                const pcl::PointCloud<pcl::PointXYZ>::Ptr to_pcl() const{
-                    pcl::PointCloud<pcl::PointXYZ>::Ptr pcl_cloud(new pcl::PointCloud<pcl::PointXYZ>);
-                    for (const auto &point : points){
-                        pcl_cloud->push_back(pcl::PointXYZ(point.x, point.y, point.z));
-                    }
-                    return pcl_cloud;
                 };
     };
 } // namespace pcl_lib
