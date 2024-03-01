@@ -3,6 +3,7 @@
 
 #include <pcl_lib/pointcloud.h>
 #include <pcl_lib/io.h>
+#include <pcl_lib/visualizer.h>
 #include <Eigen/Core>
 
 namespace po = boost::program_options;
@@ -46,8 +47,10 @@ int main( int argc, char *argv[])
     }
 
     // Read pointcloud
-    std::shared_ptr<pcl_lib::PointCloud<float>> pointcloud = std::make_shared<pcl_lib::PointCloud<float>>();
-    pcl_lib::io::readXYZRGBA<float>(input_path, pointcloud);
+    std::shared_ptr<pcl_lib::PointCloudRGBA<float>> pointcloud = std::make_shared<pcl_lib::PointCloudRGBA<float>>();
+    pcl_lib::io::read<float>(input_path, pointcloud);
+    // Make a copy of the pointcloud
+    std::shared_ptr<pcl_lib::PointCloudRGBA<float>> pointcloud_original = std::make_shared<pcl_lib::PointCloudRGBA<float>>(*pointcloud);
 
     // Sample random translation
     std::random_device rd;
@@ -61,7 +64,10 @@ int main( int argc, char *argv[])
     pointcloud->translate(translation);
     std::cout << "Translated pointcloud with t = [" << translation[0] << ", " << 
                  translation[1] << ", " << translation[2] << "]" <<std::endl;
-    pcl_lib::io::writeXYZRGBA<float>(output_folder / (std::string("translated_pcl.") + output_format), pointcloud);
+    pcl_lib::io::write<float>(output_folder / (std::string("translated_pcl.") + output_format), pointcloud);
+    std::shared_ptr<pcl_lib::PointCloudRGBA<float>> appended_pcl = std::make_shared<pcl_lib::PointCloudRGBA<float>>();
+    *appended_pcl = *pointcloud + *pointcloud_original;
+    pcl_lib::visualizer::visualize(appended_pcl);
 
     // Translate pointcloud back
     pointcloud->translate(-translation);
@@ -75,7 +81,9 @@ int main( int argc, char *argv[])
     pointcloud->rotate(quaternion);
     std::cout << "Rotated pointcloud with q = [" << quaternion.w() << ", " << 
                  quaternion.x() << ", " << quaternion.y() << ", " << quaternion.z() << "]" <<std::endl;
-    pcl_lib::io::writeXYZRGBA<float>(output_folder / (std::string("rotated_pcl.") + output_format), pointcloud);
+    pcl_lib::io::write<float>(output_folder / (std::string("rotated_pcl.") + output_format), pointcloud);
+    *appended_pcl = *pointcloud + *pointcloud_original;
+    pcl_lib::visualizer::visualize(appended_pcl);
 
     // Rotate pointcloud back
     pointcloud->rotate(quaternion.inverse());
@@ -85,5 +93,9 @@ int main( int argc, char *argv[])
     float displacement = distribDisp(gen);
     pointcloud->displace(displacement, normals_search_radius);
     std::cout << "Displaced pointcloud with d = " << displacement << std::endl;
-    pcl_lib::io::writeXYZRGBA<float>(output_folder / (std::string("displaced_pcl.") + output_format), pointcloud);
+    pcl_lib::io::write<float>(output_folder / (std::string("displaced_pcl.") + output_format), pointcloud);
+    // Translate for visualization purposes
+    pointcloud->translate(Eigen::Vector3f(1.5, 0.0, 0.0));
+    *appended_pcl = *pointcloud + *pointcloud_original;
+    pcl_lib::visualizer::visualize(appended_pcl);
 }

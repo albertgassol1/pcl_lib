@@ -10,12 +10,12 @@
 namespace pcl_lib {
     namespace io {
         template <typename T>
-        inline void readXYZRGBA(const boost::filesystem::path &path, std::shared_ptr<pcl_lib::PointCloud<T>> &pointcloud) {
+        void read(const boost::filesystem::path &path, std::shared_ptr<pcl_lib::PointCloudRGBA<T>> &pointcloud) {
             if (path.extension() == ".ply"){
-                pcl_lib::io::readXYZRGBA_ply(path, pointcloud);
+                pcl_lib::io::read_ply(path, pointcloud);
             }
             else if (path.extension() == ".xyz"){
-                pcl_lib::io::readXYZRGBA_xyz(path, pointcloud);
+                pcl_lib::io::read_xyz(path, pointcloud);
             }
             else {
                 throw std::runtime_error("Unsupported file extension");
@@ -23,38 +23,12 @@ namespace pcl_lib {
         }
 
         template <typename T>
-        inline void readXYZ(const boost::filesystem::path &path, std::shared_ptr<pcl_lib::PointCloud<T>> &pointcloud) {
+        void write(const boost::filesystem::path &path, const std::shared_ptr<pcl_lib::PointCloudRGBA<T>> &pointcloud) {
             if (path.extension() == ".ply"){
-                pcl_lib::io::readXYZ_ply(path, pointcloud);
+                pcl_lib::io::write_ply(path, pointcloud);
             }
             else if (path.extension() == ".xyz"){
-                pcl_lib::io::readXYZ_xyz(path, pointcloud);
-            }
-            else {
-                throw std::runtime_error("Unsupported file extension");
-            }
-        }
-
-        template <typename T>
-        inline void writeXYZRGBA(const boost::filesystem::path &path, const std::shared_ptr<pcl_lib::PointCloud<T>> &pointcloud) {
-            if (path.extension() == ".ply"){
-                pcl_lib::io::writeXYZRGBA_ply(path, pointcloud);
-            }
-            else if (path.extension() == ".xyz"){
-                pcl_lib::io::writeXYZRGBA_xyz(path, pointcloud);
-            }
-            else {
-                throw std::runtime_error("Unsupported file extension");
-            }
-        }
-
-        template <typename T>
-        inline void writeXYZ(const boost::filesystem::path &path, const std::shared_ptr<pcl_lib::PointCloud<T>> &pointcloud) {
-            if (path.extension() == ".ply"){
-                pcl_lib::io::writeXYZ_ply(path, pointcloud);
-            }
-            else if (path.extension() == ".xyz"){
-                pcl_lib::io::writeXYZ_xyz(path, pointcloud);
+                pcl_lib::io::write_xyz(path, pointcloud);
             }
             else {
                 throw std::runtime_error("Unsupported file extension");

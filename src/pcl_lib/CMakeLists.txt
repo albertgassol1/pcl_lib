@@ -3,6 +3,7 @@ set(LIBRARY_TARGET_NAME ${PROJECT_NAME})
 set(${LIBRARY_TARGET_NAME}_HDR
         include/pcl_lib/io.h
         include/pcl_lib/pointcloud.h
+        include/pcl_lib/visualization.h
 )
 
 find_package(PCL 1.8 REQUIRED)
