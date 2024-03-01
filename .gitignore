@@ -30,3 +30,15 @@
 *.exe
 *.out
 *.app
+
+# Data
+data/
+
+# Output
+output/
+
+# Build
+build/
+
+# VS Code
+.vscode/
