@@ -11,6 +11,17 @@ namespace pcl_lib {
             T y;
             T z;
 
+        Point() = default;
+        
+        Point(T _x, T _y, T _z) : x(_x), y(_y), z(_z) {}
+
+        void normalize() {
+            T length = std::sqrt(x * x + y * y + z * z);
+            x /= length;
+            y /= length;
+            z /= length;
+        }
+
         void translate(const Point<T>& translation) {
             x += translation.x;
             y += translation.y;
@@ -129,5 +140,9 @@ namespace pcl_lib {
             T g;
             T b;
             T a;
+        
+        PointRGBA() = default;
+        
+        PointRGBA(T _x, T _y, T _z, T _r, T _g, T _b, T _a) : Point<T>(_x, _y, _z), r(_r), g(_g), b(_b), a(_a) {}
     }; 
 } // namespace pcl_lib
