@@ -2,6 +2,7 @@
 
 #include <pcl/point_types.h>
 #include <pcl/features/normal_3d.h>
+#include <pcl/features/normal_3d_omp.h>
 #include <vector>
 #include "point.h"
 
@@ -57,84 +58,98 @@ namespace pcl_lib
                 };
  
                 void translate(const pcl_lib::Point<T>& translation) {
+                    #pragma omp parallel for
                     for (auto &point : points) {
                         point.translate(translation);
                     }
                 };
  
                 void translate(const std::vector<T>& translation) {
+                    #pragma omp parallel for
                     for (auto &point : points) {
                         point.translate(translation);
                     }
                 };
  
                 void translate(const Eigen::Matrix<T, 3, 1>& translation) {
+                    #pragma omp parallel for
                     for (auto &point : points) {
                         point.translate(translation);
                     }
                 }
 
                 void rotate(const Eigen::Matrix<T, 3, 3>& rotation) {
+                    #pragma omp parallel for
                     for (auto &point : points) {
                         point.rotate(rotation);
                     }
                 };
 
                 void rotate(const Eigen::Quaternion<T>& rotation) {
+                    #pragma omp parallel for
                     for (auto &point : points) {
                         point.rotate(rotation);
                     }
                 };
 
                 void rotate(const Eigen::Matrix<T, 3, 1>& rotation) {
+                    #pragma omp parallel for
                     for (auto &point : points) {
                         point.rotate(rotation);
                     }
                 };
 
                 void rotate(const std::vector<T>& rotation) {
+                    #pragma omp parallel for
                     for (auto &point : points) {
                         point.rotate(rotation);
                     }
                 };
 
                 void rotate(const T& angle_x, const T& angle_y, const T& angle_z) {
+                    #pragma omp parallel for
                     for (auto &point : points) {
                         point.rotate(angle_x, angle_y, angle_z);
                     }
                 };
 
                 void transform(const Eigen::Matrix<T, 4, 4>& transformation) {
+                    #pragma omp parallel for
                     for (auto &point : points) {
                         point.transform(transformation);
                     }
                 };
 
                 void transform(const Eigen::Matrix<T, 3, 3>& rotation, const Eigen::Matrix<T, 3, 1>& translation) {
+                    #pragma omp parallel for
                     for (auto &point : points) {
                         point.transform(rotation, translation);
                     }
                 };
 
                 void transform(const Eigen::Quaternion<T>& rotation, const Eigen::Matrix<T, 3, 1>& translation) {
+                    #pragma omp parallel for
                     for (auto &point : points) {
                         point.transform(rotation, translation);
                     }
                 };
 
                 void transform(const Eigen::Matrix<T, 3, 1>& rotation, const Eigen::Matrix<T, 3, 1>& translation) {
+                    #pragma omp parallel for
                     for (auto &point : points) {
                         point.transform(rotation, translation);
                     }
                 };
 
                 void transform(const std::vector<T>& rotation, const std::vector<T>& translation) {
+                    #pragma omp parallel for
                     for (auto &point : points) {
                         point.transform(rotation, translation);
                     }
                 };
 
                 void transform(const T& angle_x, const T& angle_y, const T& angle_z, const T& translation_x, const T& translation_y, const T& translation_z) {
+                    #pragma omp parallel for
                     for (auto &point : points) {
                         point.transform(angle_x, angle_y, angle_z, translation_x, translation_y, translation_z);
                     }
@@ -144,6 +159,7 @@ namespace pcl_lib
                     // Get normals
                     pcl::PointCloud<pcl::Normal>::Ptr normals = compute_normals(search_radius);
                     // Displace points in the direction of the normals
+                    #pragma omp parallel for
                     for (std::size_t i = 0; i < num_points; ++i) {
                         pcl_lib::Point<T> normal = pcl_lib::Point<T>(normals->points[i].normal_x, 
                                                                      normals->points[i].normal_y, 
@@ -161,7 +177,7 @@ namespace pcl_lib
                 const pcl::PointCloud<pcl::Normal>::Ptr compute_normals(const float search_radius = 0.03) const{
                     pcl::PointCloud<pcl::PointXYZ>::Ptr cloud = to_pcl();
                     pcl::PointCloud<pcl::Normal>::Ptr normals(new pcl::PointCloud<pcl::Normal>);
-                    pcl::NormalEstimation<pcl::PointXYZ, pcl::Normal> ne;
+                    pcl::NormalEstimationOMP<pcl::PointXYZ, pcl::Normal> ne;
                     ne.setInputCloud(cloud);
                     pcl::search::KdTree<pcl::PointXYZ>::Ptr tree(new pcl::search::KdTree<pcl::PointXYZ>());
                     ne.setSearchMethod(tree);
