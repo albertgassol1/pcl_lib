@@ -11,38 +11,23 @@
 namespace pcl_lib {
     namespace visualizer {
 
-        // pcl::visualization::PCLVisualizer::Ptr rgbaVis (pcl::PointCloud<pcl::PointXYZRGBA>::ConstPtr cloud) {
-        //     pcl::visualization::PCLVisualizer::Ptr viewer (new pcl::visualization::PCLVisualizer ("3D Viewer"));
-        //     viewer->setBackgroundColor(0, 0, 0);
-        //     pcl::visualization::PointCloudColorHandlerRGBAField<pcl::PointXYZRGBA> rgba(cloud);
-        //     viewer->addPointCloud<pcl::PointXYZRGBA>(cloud, rgba, "sample cloud");
-        //     viewer->setPointCloudRenderingProperties(pcl::visualization::PCL_VISUALIZER_POINT_SIZE, 3, "sample cloud");
-        //     viewer->addCoordinateSystem(1.0);
-        //     viewer->initCameraParameters();
-        //     return viewer;
-        // }
-
-        pcl::visualization::PCLVisualizer::Ptr xzyVis(pcl::PointCloud<pcl::PointXYZ>::ConstPtr cloud) {
+        pcl::visualization::PCLVisualizer::Ptr pclVisualize(pcl::PointCloud<pcl::PointXYZRGBA>::ConstPtr cloud) {
             pcl::visualization::PCLVisualizer::Ptr viewer (new pcl::visualization::PCLVisualizer ("3D Viewer"));
             viewer->getRenderWindow()->GlobalWarningDisplayOff();
-            viewer->setBackgroundColor(0, 0, 0);
-            viewer->addPointCloud<pcl::PointXYZ>(cloud, "sample cloud");
-            viewer->setPointCloudRenderingProperties(pcl::visualization::PCL_VISUALIZER_POINT_SIZE, 1, "sample cloud");
+            viewer->setBackgroundColor(1.0, 1.0, 1.0);
+            pcl::visualization::PointCloudColorHandlerRGBAField<pcl::PointXYZRGBA> rgba(cloud);
+            viewer->addPointCloud<pcl::PointXYZRGBA>(cloud, rgba, "sample cloud");
+            viewer->setPointCloudRenderingProperties(pcl::visualization::PCL_VISUALIZER_POINT_SIZE, 3, "sample cloud");
             viewer->addCoordinateSystem(1.0);
             viewer->initCameraParameters();
             return viewer;
         }
 
-        // template <typename T>
-        // void visualizeRGBA(const std::shared_ptr<pcl_lib::PointCloud<T>> &pointcloud){
-        //     const auto& points = pointcloud->to_pcl();
-        //     rgbaVis(points);
-        // }
-
         template <typename T>
-        void visualizeXYZ(const std::shared_ptr<pcl_lib::PointCloud<T>> &pointcloud){
-            const auto& points = pointcloud->to_pcl();
-            const auto& viewer = xzyVis(points);
+        void visualize(const std::shared_ptr<pcl_lib::PointCloudRGBA<T>> &pointcloud){
+            const auto& points = pointcloud->toPcl();
+            std::cout << "A: " << pointcloud->at(0).a << std::endl;
+            const auto& viewer = pclVisualize(points);
             while (!viewer->wasStopped()) {
                 viewer->spinOnce(100);
                 std::this_thread::sleep_for(std::chrono::milliseconds(100));

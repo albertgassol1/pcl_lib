@@ -9,19 +9,19 @@
 namespace pcl_lib
 {
     template <typename T> 
-        class PointCloud {
+        class PointCloudRGBA {
             public:
-                PointCloud () : num_points(0), fixed_size(false) {};
+                PointCloudRGBA () : num_points(0), fixed_size(false) {};
 
-                PointCloud(const PointCloud& other) : points(other.points), num_points(other.num_points), fixed_size(other.fixed_size) {};
+                PointCloudRGBA(const PointCloudRGBA& other) : points(other.points), num_points(other.num_points), fixed_size(other.fixed_size) {};
 
-                PointCloud (const std::size_t n_points) : points(n_points), num_points(n_points), fixed_size(true) {
+                PointCloudRGBA (const std::size_t n_points) : points(n_points), num_points(n_points), fixed_size(true) {
                     assert(n_points >= 0);
                 };
 
-                PointCloud(const std::vector<pcl_lib::Point<T>>& pts, const bool fixed)  : points(pts), num_points(pts.size()), fixed_size(fixed) {};
+                PointCloudRGBA(const std::vector<pcl_lib::PointRGBA<T>>& pts, const bool fixed)  : points(pts), num_points(pts.size()), fixed_size(fixed) {};
 
-                void add(const Point<T>& point) {
+                void add(const PointRGBA<T>& point) {
                     assert(!fixed_size);
                     points.emplace_back(point);
                     num_points++;
@@ -35,38 +35,38 @@ namespace pcl_lib
                     return num_points;
                 };
  
-                const pcl_lib::Point<T>& operator[](const std::size_t i) const {
+                const pcl_lib::PointRGBA<T>& operator[](const std::size_t i) const {
                     assert(i < num_points);
                     return points[i];
                 };
 
-                pcl_lib::PointCloud<T> operator+(const pcl_lib::PointCloud<T>& other) const {
-                    std::vector<pcl_lib::Point<T>> new_points;
+                pcl_lib::PointCloudRGBA<T> operator+(const pcl_lib::PointCloudRGBA<T>& other) const {
+                    std::vector<pcl_lib::PointRGBA<T>> new_points;
                     new_points.reserve(num_points + other.size());
                     new_points.insert(new_points.end(), points.begin(), points.end());
                     new_points.insert(new_points.end(), other.get_points().begin(), other.get_points().end());
                     
-                    return pcl_lib::PointCloud<T>(new_points, false); 
+                    return pcl_lib::PointCloudRGBA<T>(new_points, false); 
                 };
  
-                const pcl_lib::Point<T>& at(const std::size_t i) const {
+                const pcl_lib::PointRGBA<T>& at(const std::size_t i) const {
                     assert(i < num_points);
                     return points[i];
                 };
  
-                const std::vector<pcl_lib::Point<T>>& get_points() const {
+                const std::vector<pcl_lib::PointRGBA<T>>& get_points() const {
                     return points;
                 };
  
-                std::vector<pcl_lib::Point<T>> get_points_copy() const {
-                    return std::vector<pcl_lib::Point<T>>(points);
+                std::vector<pcl_lib::PointRGBA<T>> get_points_copy() const {
+                    return std::vector<pcl_lib::PointRGBA<T>>(points);
                 };
  
-                bool is_fixed_size() const {
+                bool isFixedSize() const {
                     return fixed_size;
                 };
  
-                void translate(const pcl_lib::Point<T>& translation) {
+                void translate(const pcl_lib::PointRGBA<T>& translation) {
                     #pragma omp parallel for
                     for (auto &point : points) {
                         point.translate(translation);
@@ -166,19 +166,27 @@ namespace pcl_lib
 
                 void displace(const T& displacement, const float search_radius = 0.03) {
                     // Get normals
-                    pcl::PointCloud<pcl::Normal>::Ptr normals = compute_normals(search_radius);
+                    pcl::PointCloud<pcl::Normal>::Ptr normals = computeNormals(search_radius);
                     // Displace points in the direction of the normals
                     #pragma omp parallel for
                     for (std::size_t i = 0; i < num_points; ++i) {
                         pcl_lib::Point<T> normal = pcl_lib::Point<T>(normals->points[i].normal_x, 
-                                                                     normals->points[i].normal_y, 
-                                                                     normals->points[i].normal_z);
+                                                                         normals->points[i].normal_y, 
+                                                                         normals->points[i].normal_z);
                         normal.normalize();
                         points[i].translate(normal * displacement);
                     }
                 };
 
-                const pcl::PointCloud<pcl::PointXYZ>::Ptr to_pcl() const{
+                const pcl::PointCloud<pcl::PointXYZRGBA>::Ptr toPcl() const{
+                    pcl::PointCloud<pcl::PointXYZRGBA>::Ptr pcl_cloud(new pcl::PointCloud<pcl::PointXYZRGBA>);
+                    for (const auto &point : points){
+                        pcl_cloud->push_back(pcl::PointXYZRGBA(point.x, point.y, point.z, point.r, point.g, point.b, point.a));
+                    }
+                    return pcl_cloud;
+                };
+
+                const pcl::PointCloud<pcl::PointXYZ>::Ptr toPclXYZ() const{
                     pcl::PointCloud<pcl::PointXYZ>::Ptr pcl_cloud(new pcl::PointCloud<pcl::PointXYZ>);
                     for (const auto &point : points){
                         pcl_cloud->push_back(pcl::PointXYZ(point.x, point.y, point.z));
@@ -186,13 +194,20 @@ namespace pcl_lib
                     return pcl_cloud;
                 };
 
+                void setAChannel(const T& value) {
+                    #pragma omp parallel for
+                    for (auto &point : points) {
+                        point.a = value;
+                    }
+                };
+
             private:
-                std::vector<pcl_lib::Point<T>> points;
+                std::vector<pcl_lib::PointRGBA<T>> points;
                 std::size_t num_points{0};
                 bool fixed_size{false};
 
-                const pcl::PointCloud<pcl::Normal>::Ptr compute_normals(const float search_radius = 0.03) const{
-                    pcl::PointCloud<pcl::PointXYZ>::Ptr cloud = to_pcl();
+                const pcl::PointCloud<pcl::Normal>::Ptr computeNormals(const float search_radius = 0.03) const{
+                    pcl::PointCloud<pcl::PointXYZ>::Ptr cloud = toPclXYZ();
                     pcl::PointCloud<pcl::Normal>::Ptr normals(new pcl::PointCloud<pcl::Normal>);
                     pcl::NormalEstimationOMP<pcl::PointXYZ, pcl::Normal> ne;
                     ne.setInputCloud(cloud);
