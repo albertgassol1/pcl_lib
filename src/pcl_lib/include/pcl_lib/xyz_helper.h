@@ -17,7 +17,7 @@ namespace pcl_lib {
 
         template <typename T>
         void read_xyz(const boost::filesystem::path &path, std::shared_ptr<pcl_lib::PointCloudRGBA<T>> &pointcloud){
-            std::ifstream file(path);
+            std::ifstream file(path.string());
             if (!file.is_open()) {
                 std::cerr << "Failed to open file: " << path.string() << std::endl;
                 return;
@@ -46,7 +46,7 @@ namespace pcl_lib {
 
         template <typename T>
         void write_xyz(const boost::filesystem::path &path, const std::shared_ptr<pcl_lib::PointCloudRGBA<T>> &pointcloud){
-            std::ofstream file(path);
+            std::ofstream file(path.string());
             if (!file.is_open()) {
                 std::cerr << "Failed to open file: " << path.string() << std::endl;
                 return;
