@@ -18,6 +18,7 @@ RUN apt-get update && apt-get install -q -y --no-install-recommends \
     libflann-dev \
     ca-certificates \
     freeglut3-dev \
+    libvtk7-dev \
     && rm -rf /var/lib/apt/lists/*
 
 # Clone PCL and install it
