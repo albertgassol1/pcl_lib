@@ -1,7 +1,7 @@
 #include <boost/program_options.hpp>
 #include <random>   
 
-#include <pcl_lib/pointcloud.h>
+#include <pcl_lib/pointcloud_rgba.h>
 #include <pcl_lib/io.h>
 #include <pcl_lib/visualizer.h>
 #include <Eigen/Core>

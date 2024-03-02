@@ -9,7 +9,7 @@
 #include <pcl/point_types.h>
 #include <pcl/point_cloud.h>
 #include <pcl/io/ply_io.h>
-#include "pointcloud.h"
+#include "pointcloud_rgba.h"
 #include "point.h"
 
 namespace pcl_lib {
