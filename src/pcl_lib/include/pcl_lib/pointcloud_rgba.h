@@ -10,7 +10,7 @@
 namespace pcl_lib
 {
     template <typename T> 
-        class PointCloudRGBA : PointCloudBase<T>{
+        class PointCloudRGBA : public PointCloudBase<T>{
             public:
                 PointCloudRGBA () : PointCloudBase<T>(0, false){};
 

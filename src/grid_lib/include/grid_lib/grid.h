@@ -42,41 +42,29 @@ namespace pcl_lib {
         template <typename T>
         class GridHandler {
             public:
-                GridHandler(const std::shared_ptr<Grid<T>>& _grid,
-                            const T _max_velocity) : grid(std::move(_grid)),
-                                                     pointcloud(std::make_shared<pcl_lib::PointCloudConstVel<T>>(),
-                                                     max_velocity(_max_velocity)) {
-                    assert(max_velocity > 0);
-                }
+
+                GridHandler() : grid(std::make_shared<Grid<T>>()), 
+                                pointcloud(std::make_shared<pcl_lib::PointCloudConstVel<T>>()) {}
+
+                GridHandler(const std::shared_ptr<Grid<T>>& _grid) : grid(std::move(_grid)),
+                                                                     pointcloud(std::make_shared<pcl_lib::PointCloudConstVel<T>>()) {}
 
                 GridHandler(const T _x_min, const T _x_max, 
                             const T _y_min, const T _y_max, 
-                            const T _z_min, const T _z_max,
-                            const T _max_velocity) : grid(std::make_shared<Grid<T>>(_x_min, _x_max, _y_min, _y_max, _z_min, _z_max)),
-                                                     pointcloud(std::make_shared<pcl_lib::PointCloudConstVel<T>>(),
-                                                     max_velocity(_max_velocity)) {
-                    assert(max_velocity > 0);
-                }
+                            const T _z_min, const T _z_max) : grid(std::make_shared<Grid<T>>(_x_min, _x_max, _y_min, _y_max, _z_min, _z_max)),
+                                                              pointcloud(std::make_shared<pcl_lib::PointCloudConstVel<T>>()) {}
 
                 GridHandler(const std::shared_ptr<Grid<T>>& _grid, 
-                            const std::shared_ptr<pcl_lib::PointCloudConstVel<T>>& _pointcloud,
-                            const T _max_velocity) : grid(std::move(_grid)), 
-                                                     pointcloud(std::move(_pointcloud),
-                                                     kdtree(std::make_unique<KDTreeWrapper<T>>(pointcloud)),
-                                                     max_velocity(_max_velocity)) {
-                    assert(max_velocity > 0);
-                }
+                            const std::shared_ptr<pcl_lib::PointCloudConstVel<T>>& _pointcloud) : grid(std::move(_grid)), 
+                                                                                    pointcloud(std::move(_pointcloud),
+                                                                                    kdtree(std::make_unique<KDTreeWrapper<T>>(pointcloud))) {}
 
                 GridHandler(const T _x_min, const T _x_max, 
                             const T _y_min, const T _y_max, 
                             const T _z_min, const T _z_max, 
-                            const std::shared_ptr<pcl_lib::PointCloudConstVel<T>>& _pointcloud,
-                            const T _max_velocity) : grid(std::make_shared<Grid<T>>(_x_min, _x_max, _y_min, _y_max, _z_min, _z_max)), 
-                                                     pointcloud(std::move(_pointcloud),
-                                                     kdtree(std::make_unique<KDTreeWrapper<T>>(pointcloud)), 
-                                                     max_velocity(_max_velocity)) {
-                    assert(max_velocity > 0);
-                }
+                            const std::shared_ptr<pcl_lib::PointCloudConstVel<T>>& _pointcloud) : grid(std::make_shared<Grid<T>>(_x_min, _x_max, _y_min, _y_max, _z_min, _z_max)), 
+                                                                                                  pointcloud(std::move(_pointcloud),
+                                                                                                  kdtree(std::make_unique<KDTreeWrapper<T>>(pointcloud))) {}
 
                 void setPointcloud(const std::shared_ptr<pcl_lib::PointCloudConstVel<T>>& _pointcloud) {
                     pointcloud = std::move(_pointcloud);
@@ -91,21 +79,22 @@ namespace pcl_lib {
                     return pointcloud;
                 }
 
-                void initializeRandomPointcloud(const std::size_t n_points) {
+                void initializeRandomPointcloud(const std::size_t n_points, const T point_radius, const T max_velocity = 0.1) {
                     if(pointcloud->size() > 0) {
                         pointcloud->clear();
                     }
 
                     std::random_device rd;
                     std::mt19937 gen(rd());
-                    std::uniform_real_distribution<float> distribX(this->grid->x_min, this->grid->x_max);
-                    std::uniform_real_distribution<float> distribY(this->grid->y_min, this->grid->y_max);
-                    std::uniform_real_distribution<float> distribZ(this->grid->z_min, this->grid->z_max);
-                    std::uniform_real_distribution<float> distribV(-max_velocity, max_velocity);
+                    std::uniform_real_distribution<T> distribX(this->grid->x_min, this->grid->x_max);
+                    std::uniform_real_distribution<T> distribY(this->grid->y_min, this->grid->y_max);
+                    std::uniform_real_distribution<T> distribZ(this->grid->z_min, this->grid->z_max);
+                    std::uniform_real_distribution<T> distribV(-max_velocity, max_velocity);
 
                     for(std::size_t i = 0; i < n_points; i++) {
                         pointcloud->add(pcl_lib::PointConstVel<T>(distribX(gen), distribY(gen), distribZ(gen), 
-                                                                  distribV(gen), distribV(gen), distribV(gen)));
+                                                                  distribV(gen), distribV(gen), distribV(gen),
+                                                                  point_radius));
                     }
                     if (kdtree == nullptr) {
                         kdtree = std::make_unique<KDTreeWrapper<T>>(pointcloud);
@@ -162,7 +151,6 @@ namespace pcl_lib {
                 std::shared_ptr<Grid<T>> grid;
                 std::shared_ptr<pcl_lib::PointCloudConstVel<T>> pointcloud;
                 std::unique_ptr<KDTreeWrapper<T>> kdtree;
-                T max_velocity;
         };
     }
 }

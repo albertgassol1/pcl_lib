@@ -35,6 +35,8 @@ namespace pcl_lib {
             inline T kdtree_get_bbox_min(const std::size_t /*idx*/, std::size_t /*dim*/) const { return 0; }
             // Not used for this demonstration
             inline T kdtree_get_bbox_max(const std::size_t /*idx*/, std::size_t /*dim*/) const { return 0; }
+
+            template <class BBOX> bool kdtree_get_bbox(BBOX& /* bb */) const { return false; }
         };
 
         template <typename T>

@@ -10,7 +10,7 @@
 namespace pcl_lib
 {
     template <typename T> 
-        class PointCloudConstVel : PointCloudBase<T>{
+        class PointCloudConstVel : public PointCloudBase<T>{
 
             public:
                 PointCloudConstVel () : PointCloudBase<T>(0, false){};
@@ -23,7 +23,7 @@ namespace pcl_lib
 
                 PointCloudConstVel(const std::vector<pcl_lib::PointConstVel<T>>& pts, const bool fixed)  : points(pts), PointCloudBase<T>(pts.size(), fixed) {};
 
-                void add(const PointConstVel<T>& point) {
+                void add(const pcl_lib::PointConstVel<T>& point) {
                     assert(!fixed_size);
                     points.emplace_back(point);
                     this->num_points++;
