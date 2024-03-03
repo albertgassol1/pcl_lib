@@ -34,7 +34,8 @@ RUN apt-get update && apt-get install -q -y --no-install-recommends \
     openmpi-common \
     libqhull-dev \
     libgtest-dev \
-    libopencv-dev
+    libopencv-dev \
+    libnanoflann-dev
 
 # Install VTK
 RUN wget https://www.vtk.org/files/release/8.2/VTK-8.2.0.tar.gz \

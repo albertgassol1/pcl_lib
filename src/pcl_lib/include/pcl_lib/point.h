@@ -15,6 +15,19 @@ namespace pcl_lib {
             
             Point(T _x, T _y, T _z) : x(_x), y(_y), z(_z) {}
 
+            const T& operator[](const std::size_t index) const {
+                switch (index) {
+                    case 0:
+                        return x;
+                    case 1:
+                        return y;
+                    case 2:
+                        return z;
+                    default:
+                        throw std::out_of_range("Index out of range");
+                }
+            }
+
             void normalize() {
                 T length = std::sqrt(x * x + y * y + z * z);
                 x /= length;
@@ -161,5 +174,9 @@ namespace pcl_lib {
             PointConstVel(T _x, T _y, T _z, T _vx, T _vy, T _vz, T _radius) : Point<T>(_x, _y, _z), velocity(_vx, _vy, _vz), radius(_radius) {}
 
             PointConstVel(const Point<T>& point, const Point<T>& _velocity, T _radius) : Point<T>(point), velocity(_velocity), radius(_radius) {}
+
+            void update(const T& dt) {
+                translate(velocity * dt);
+            }
         };
 } // namespace pcl_lib

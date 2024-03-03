@@ -158,6 +158,13 @@ namespace pcl_lib
                     }
                 };
 
+                void update(const T& dt) {
+                    #pragma omp parallel for
+                    for(auto& point : points) {
+                        point.update(dt);
+                    }
+                }
+
                 const pcl::PointCloud<pcl::PointXYZ>::Ptr toPclXYZ() const{
                     pcl::PointCloud<pcl::PointXYZ>::Ptr pcl_cloud(new pcl::PointCloud<pcl::PointXYZ>);
                     for (const auto &point : points){
