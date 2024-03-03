@@ -4,7 +4,7 @@
 
 #include "ply_helper.h"
 #include "xyz_helper.h"
-#include "pointcloud.h"
+#include "pointcloud_rgba.h"
 #include "point.h"
 
 namespace pcl_lib {

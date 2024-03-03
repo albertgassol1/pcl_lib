@@ -5,7 +5,7 @@
 #include <pcl/visualization/pcl_visualizer.h>
 
 
-#include "pointcloud.h"
+#include "pointcloud_rgba.h"
 
 
 namespace pcl_lib {
