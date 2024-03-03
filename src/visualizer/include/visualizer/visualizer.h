@@ -72,7 +72,6 @@ namespace pcl_lib {
                            const double point_size = 3.0, const std::string& name = "pcl"){
             const auto& originalPoints = grid->getPointCloud()->toPclXYZ();
             pcl::visualization::PCLVisualizer::Ptr viewer (new pcl::visualization::PCLVisualizer ("3D Viewer"));
-            std::cout << "Points size: " << grid->getConstPointsSize() << std::endl;
             pclVisualize(viewer, originalPoints,  grid->getGrid(), point_size, name);
             visualizeGridLines(viewer, grid, name);
             while (!viewer->wasStopped()) {

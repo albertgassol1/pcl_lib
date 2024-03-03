@@ -22,9 +22,7 @@ namespace pcl_lib {
             Reader.read(path.string(), *plc_cloud);
 
             // Convert the pcl pointcloud to pcl_lib pointcloud
-            std::cout << "clear" << std::endl;
             pointcloud->clear();
-            std::cout << "Read" << std::endl;
             for (const auto &point : plc_cloud->points){
                 pointcloud->add(pcl_lib::PointRGBA<T>(point.x, point.y, point.z, point.r, point.g, point.b, point.a));
             }
