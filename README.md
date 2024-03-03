@@ -46,6 +46,8 @@ sudo apt install \
 
  This repo uses CMake to build.
  ```bash
+ git@github.com:albertgassol1/pcl_lib.git
+ git lfs pull
  mkdir build
  cd build
  cmake ..
