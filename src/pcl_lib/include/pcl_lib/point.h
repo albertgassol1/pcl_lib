@@ -15,7 +15,20 @@ namespace pcl_lib {
             
             Point(T _x, T _y, T _z) : x(_x), y(_y), z(_z) {}
 
-            const T& operator[](const std::size_t index) const {
+            T& operator[](const std::size_t index) {
+                switch (index) {
+                    case 0:
+                        return x;
+                    case 1:
+                        return y;
+                    case 2:
+                        return z;
+                    default:
+                        throw std::out_of_range("Index out of range");
+                }
+            }
+
+            const T& at(const std::size_t index) const {
                 switch (index) {
                     case 0:
                         return x;
@@ -176,7 +189,14 @@ namespace pcl_lib {
             PointConstVel(const Point<T>& point, const Point<T>& _velocity, T _radius) : Point<T>(point), velocity(_velocity), radius(_radius) {}
 
             void update(const T& dt) {
-                translate(velocity * dt);
+                this->translate(velocity * dt);
+            }
+
+            void update(const T& dt, const std::vector<T>& min, const std::vector<T>& max) {
+                this->translate(velocity * dt);
+                this->x = std::max(min[0] + radius, std::min(max[0] - radius, this->x));
+                this->y = std::max(min[1] + radius, std::min(max[1] - radius, this->y));
+                this->z = std::max(min[2] + radius, std::min(max[2] - radius, this->z));
             }
         };
 } // namespace pcl_lib

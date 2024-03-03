@@ -7,6 +7,7 @@
 #include <pcl/point_cloud.h>
 #include <pcl/io/ply_io.h>
 #include "pointcloud_rgba.h"
+#include "pointcloud_constvel.h"
 #include "point.h"
 
 
@@ -29,11 +30,12 @@ namespace pcl_lib {
             }
         }
 
+
         template <typename T>
         void write_ply(const boost::filesystem::path &path, const std::shared_ptr<pcl_lib::PointCloudRGBA<T>> &pointcloud){
             // Convert the pcl_lib pointcloud to pcl pointcloud
             pcl::PointCloud<pcl::PointXYZRGBA>::Ptr plc_cloud (new pcl::PointCloud<pcl::PointXYZRGBA>);
-            for (const auto& point : pointcloud->get_points_copy()){
+            for (const auto& point : pointcloud->getConstPointsCopy()){
                 plc_cloud->push_back(pcl::PointXYZRGBA(point.x, point.y, point.z, point.r, point.g, point.b, point.a));
             }
 
@@ -41,5 +43,19 @@ namespace pcl_lib {
             pcl::PLYWriter Writer;
             Writer.write(path.string(), *plc_cloud);
         }
+
+        template <typename T>
+        void write_ply(const boost::filesystem::path &path, const std::shared_ptr<pcl_lib::PointCloudConstVel<T>> &pointcloud){
+            // Convert the pcl_lib pointcloud to pcl pointcloud
+            pcl::PointCloud<pcl::PointXYZRGBA>::Ptr plc_cloud (new pcl::PointCloud<pcl::PointXYZRGBA>);
+            for (const auto& point : pointcloud->getConstPointsCopy()){
+                plc_cloud->push_back(pcl::PointXYZRGBA(point.x, point.y, point.z, 255, 255, 255, 255));
+            }
+
+            // Write the pcl pointcloud to ply file
+            pcl::PLYWriter Writer;
+            Writer.write(path.string(), *plc_cloud);
+        }
+
     }
 }

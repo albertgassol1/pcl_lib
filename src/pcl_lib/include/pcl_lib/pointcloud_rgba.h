@@ -41,7 +41,7 @@ namespace pcl_lib
                     std::vector<pcl_lib::PointRGBA<T>> new_points;
                     new_points.reserve(this->num_points + other.size());
                     new_points.insert(new_points.end(), points.begin(), points.end());
-                    new_points.insert(new_points.end(), other.get_points().begin(), other.get_points().end());
+                    new_points.insert(new_points.end(), other.getConstPoints().begin(), other.getConstPoints().end());
                     
                     return pcl_lib::PointCloudRGBA<T>(new_points, false); 
                 };
@@ -51,11 +51,11 @@ namespace pcl_lib
                     return points[i];
                 };
  
-                const std::vector<pcl_lib::PointRGBA<T>>& get_points() const {
+                const std::vector<pcl_lib::PointRGBA<T>>& getConstPoints() const {
                     return points;
                 };
  
-                std::vector<pcl_lib::PointRGBA<T>> get_points_copy() const {
+                std::vector<pcl_lib::PointRGBA<T>> getConstPointsCopy() const {
                     return std::vector<pcl_lib::PointRGBA<T>>(points);
                 };
  

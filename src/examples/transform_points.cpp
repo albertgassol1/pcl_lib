@@ -3,7 +3,7 @@
 
 #include <pcl_lib/pointcloud_rgba.h>
 #include <pcl_lib/io.h>
-#include <pcl_lib/visualizer.h>
+#include <visualizer/visualizer.h>
 #include <Eigen/Core>
 
 namespace po = boost::program_options;
@@ -67,7 +67,7 @@ int main( int argc, char *argv[])
     pcl_lib::io::write<float>(output_folder / (std::string("translated_pcl.") + output_format), pointcloud);
     std::shared_ptr<pcl_lib::PointCloudRGBA<float>> appended_pcl = std::make_shared<pcl_lib::PointCloudRGBA<float>>();
     *appended_pcl = *pointcloud + *pointcloud_original;
-    pcl_lib::visualizer::visualize(appended_pcl);
+    pcl_lib::visualizer::visualizeStaticPcl(appended_pcl);
 
     // Translate pointcloud back
     pointcloud->translate(-translation);
@@ -83,7 +83,7 @@ int main( int argc, char *argv[])
                  quaternion.x() << ", " << quaternion.y() << ", " << quaternion.z() << "]" <<std::endl;
     pcl_lib::io::write<float>(output_folder / (std::string("rotated_pcl.") + output_format), pointcloud);
     *appended_pcl = *pointcloud + *pointcloud_original;
-    pcl_lib::visualizer::visualize(appended_pcl);
+    pcl_lib::visualizer::visualizeStaticPcl(appended_pcl);
 
     // Rotate pointcloud back
     pointcloud->rotate(quaternion.inverse());
@@ -97,5 +97,5 @@ int main( int argc, char *argv[])
     // Translate for visualization purposes
     pointcloud->translate(Eigen::Vector3f(1.5, 0.0, 0.0));
     *appended_pcl = *pointcloud + *pointcloud_original;
-    pcl_lib::visualizer::visualize(appended_pcl);
+    pcl_lib::visualizer::visualizeStaticPcl(appended_pcl);
 }
