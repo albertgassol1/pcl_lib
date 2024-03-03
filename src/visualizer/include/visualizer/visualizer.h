@@ -24,17 +24,23 @@ namespace pcl_lib {
             viewer->initCameraParameters();
         }
 
+        template <typename T>
         void pclVisualize(pcl::visualization::PCLVisualizer::Ptr viewer, 
                           pcl::PointCloud<pcl::PointXYZ>::ConstPtr cloud, 
+                          const std::shared_ptr<pcl_lib::grid::Grid<T>>& grid = nullptr,
                           const double point_size = 3.0,
                           const std::string& name = "pcl") {
             viewer->getRenderWindow()->GlobalWarningDisplayOff();
             viewer->setBackgroundColor(1.0, 1.0, 1.0);
             pcl::visualization::PointCloudColorHandlerCustom<pcl::PointXYZ> single_color(cloud, 0, 0, 0);
             viewer->addPointCloud<pcl::PointXYZ>(cloud, single_color, name);
-            viewer->setPointCloudRenderingProperties(pcl::visualization::PCL_VISUALIZER_POINT_SIZE, point_size * 10, name);
+            viewer->setPointCloudRenderingProperties(pcl::visualization::PCL_VISUALIZER_POINT_SIZE, point_size, name);
             viewer->addCoordinateSystem(1.0);
             viewer->initCameraParameters();
+            if (grid) {
+                viewer->setCameraPosition((grid->x_max - grid->x_min)/2, (grid->y_max - grid->y_min)/2, (grid->z_max - grid->z_min)/2, 
+                                          0, 0, 0, 0, 0, 1);
+            }
         }
 
         template <typename T>
@@ -49,9 +55,9 @@ namespace pcl_lib {
         }
 
         template <typename T>
-        void visualizeGrid(pcl::visualization::PCLVisualizer::Ptr viewer, 
-                           std::shared_ptr<pcl_lib::grid::GridHandler<T>>& grid, 
-                           const std::string& name = "pcl"){
+        void visualizeGridLines(pcl::visualization::PCLVisualizer::Ptr viewer, 
+                                std::shared_ptr<pcl_lib::grid::GridHandler<T>>& grid, 
+                                const std::string& name = "pcl"){
 
             // Visualize 6 planes of the grid
             for (std::size_t i = 0; i < 12; ++i) {
@@ -62,16 +68,17 @@ namespace pcl_lib {
 
         template <typename T>
         void visualizeGrid(std::shared_ptr<pcl_lib::grid::GridHandler<T>>& grid, const T& dt, 
-                           const bool update = false, const std::string& name = "pcl"){
+                           const bool update = false, const bool point_collisions = true,
+                           const double point_size = 3.0, const std::string& name = "pcl"){
             const auto& originalPoints = grid->getPointCloud()->toPclXYZ();
             pcl::visualization::PCLVisualizer::Ptr viewer (new pcl::visualization::PCLVisualizer ("3D Viewer"));
             std::cout << "Points size: " << grid->getConstPointsSize() << std::endl;
-            pclVisualize(viewer, originalPoints, static_cast<double>(grid->getConstPointsSize()), name);
-            visualizeGrid(viewer, grid, name);
+            pclVisualize(viewer, originalPoints,  grid->getGrid(), point_size, name);
+            visualizeGridLines(viewer, grid, name);
             while (!viewer->wasStopped()) {
                 viewer->spinOnce(static_cast<int>(dt*1000));
                 if(update) {
-                    grid->update(dt);
+                    grid->update(dt, point_collisions);
                     const auto& updatedPoints = grid->getPointCloud()->toPclXYZ();
                     pcl::visualization::PointCloudColorHandlerCustom<pcl::PointXYZ> single_color(updatedPoints, 0, 0, 0);
                     viewer->updatePointCloud(updatedPoints, single_color, name);

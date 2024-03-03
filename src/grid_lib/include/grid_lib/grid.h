@@ -58,17 +58,22 @@ namespace pcl_lib {
                  const T _y_min, const T _y_max, 
                  const T _z_min, const T _z_max) : x_min(_x_min), x_max(_x_max), y_min(_y_min), y_max(_y_max), z_min(_z_min), z_max(_z_max) {}
 
-            void setVelocityOnCollision(pcl_lib::PointConstVel<T>& point) const {
+            bool setVelocityOnCollision(pcl_lib::PointConstVel<T>& point) const {
                 // Assume 90 degrees rebound. 
+                bool collision = false;
                 if(point.x < x_min || point.x > x_max) {
                     point.velocity.x = -point.velocity.x;
+                    collision = true;
                 }
                 if(point.y < y_min || point.y > y_max) {
                     point.velocity.y = -point.velocity.y;
+                    collision = true;
                 }
                 if(point.z < z_min || point.z > z_max) {
                     point.velocity.z = -point.velocity.z;
+                    collision = true;
                 }
+                return collision;
             }
         };
 
@@ -145,29 +150,41 @@ namespace pcl_lib {
                     return grid;
                 }
 
-                void update(const T& dt) {
-                    checkGridCollisions();
-                    // checkPointCollisions();
-                    pointcloud->update(dt); //, {grid->x_min, grid->y_min, grid->z_min}, {grid->x_max, grid->y_max, grid->z_max});
+                void update(const T& dt, const bool point_collisions = true) {
+                    std::vector<bool> collided_with_grid(pointcloud->size(), false);
+                    checkGridCollisions(collided_with_grid);
+                    if (point_collisions) {
+                        checkPointCollisions(collided_with_grid);
+                    }
+                    pointcloud->update(dt);
                 }
 
                 const std::tuple<Point<T>, Point<T>> getGridLine(const std::size_t ind) const{
                     return grid->getGridLine(ind);
                 }
 
+                const std::shared_ptr<Grid<T>> getConstGrid() const {
+                    return grid;
+                }  
+
             private:
-                void checkGridCollisions() {
+                void checkGridCollisions(std::vector<bool>& collided_with_grid) {
                     #pragma omp parallel for
-                    for(auto& point : pointcloud->getPoints()) {
-                        grid->setVelocityOnCollision(point);
+                    for(std::size_t i = 0; i < pointcloud->size(); i++) {
+                        if(grid->setVelocityOnCollision((*pointcloud)[i])) {
+                            collided_with_grid[i] = true;
+                        }
                     }
                 }
 
-                void checkPointCollisions() {
+                void checkPointCollisions(std::vector<bool>& collided_with_grid) {
                     PointCloudAdaptor<T> adaptor(*pointcloud);
                     KDTree tree(3, adaptor, nanoflann::KDTreeSingleIndexAdaptorParams(10));
                     #pragma omp parallel for
-                    for (std::size_t i = 0; i < pointcloud->size(); i++) {
+                    for (std::size_t i = 0; i < pointcloud->size(); i++){
+                        if(collided_with_grid[i]) {
+                            continue;
+                        }
                         const auto& point = pointcloud->at(i);
                         std::vector<std::pair<std::size_t, T>> indices_dists;
                         nanoflann::RadiusResultSet<T, std::size_t> result_set(point.radius * 2, indices_dists);
@@ -182,6 +199,9 @@ namespace pcl_lib {
                         if(!result_set.m_indices_dists.empty()) {
                             for(const auto& index_dist : result_set.m_indices_dists) {
                                 if(index_dist.first != i) {
+                                    if (collided_with_grid[index_dist.first]) {
+                                        continue;
+                                    }
                                     // Assume 180 degrees rebound on all axes. This is a simplification.
                                     pointcloud->setVelocity(i, point.velocity * -1);
                                     break;
