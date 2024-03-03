@@ -33,7 +33,7 @@ namespace pcl_lib
                     PointCloudBase<T>::clear();
                 };
  
-                const pcl_lib::PointConstVel<T>& operator[](const std::size_t i) const {
+                pcl_lib::PointConstVel<T>& operator[](const std::size_t i) {
                     assert(i < this->num_points);
                     return points[i];
                 };
@@ -42,7 +42,7 @@ namespace pcl_lib
                     std::vector<pcl_lib::PointConstVel<T>> new_points;
                     new_points.reserve(this->num_points + other.size());
                     new_points.insert(new_points.end(), points.begin(), points.end());
-                    new_points.insert(new_points.end(), other.get_points().begin(), other.get_points().end());
+                    new_points.insert(new_points.end(), other.getConstPoints().begin(), other.getConstPoints().end());
                     
                     return pcl_lib::PointCloudConstVel<T>(new_points, false); 
                 };
@@ -52,11 +52,15 @@ namespace pcl_lib
                     return points[i];
                 };
  
-                const std::vector<pcl_lib::PointConstVel<T>>& get_points() const {
+                const std::vector<pcl_lib::PointConstVel<T>>& getConstPoints() const {
+                    return points;
+                };
+
+                std::vector<pcl_lib::PointConstVel<T>>& getPoints() {
                     return points;
                 };
  
-                std::vector<pcl_lib::PointConstVel<T>> get_points_copy() const {
+                std::vector<pcl_lib::PointConstVel<T>> getConstPointsCopy() const {
                     return std::vector<pcl_lib::PointConstVel<T>>(points);
                 };
 
@@ -163,6 +167,18 @@ namespace pcl_lib
                     for(auto& point : points) {
                         point.update(dt);
                     }
+                }
+
+                void update(const T& dt, const std::vector<T>& min, const std::vector<T>& max) {
+                    #pragma omp parallel for
+                    for(auto& point : points) {
+                        point.update(dt, min, max);
+                    }
+                }
+
+                void setVelocity(const std::size_t index, const Point<T>& velocity) {
+                    assert(index < this->num_points);
+                    points[index].velocity = velocity;
                 }
 
                 const pcl::PointCloud<pcl::PointXYZ>::Ptr toPclXYZ() const{

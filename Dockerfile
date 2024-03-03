@@ -76,6 +76,3 @@ RUN mkdir build && \
 RUN rm -rf /workspace/src && \
     rm /workspace/CMakeLists.txt && \
     rm -rf /workspace/cmake
-
-# Define the command to run the application
-ENTRYPOINT ["/workspace/build/bin/examples"]
